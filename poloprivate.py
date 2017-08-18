@@ -244,6 +244,9 @@ class PoloPrivate(object):
 				else:
 					result = "Error creating closing order: %s" % e.message
 
+
+		elif self._last_closing_dict["amount"] > dict_closing_order["amount"]:
+			result = "Waiting for margin position to close"
 	
 		elif self._last_closing_dict["amount"] != dict_closing_order["amount"] or self._last_closing_dict["rate"] != dict_closing_order["rate"]:
 			self._closing_order["orderNumber"] = self._move_order(
