@@ -47,6 +47,7 @@ class Settings(object):
 			self.c.set('Settings', 'delta', 0.9)
 			self.c.set('Settings', 'stopLimit', 0.05)
 			self.c.set('Settings', 'stopLimitTimeout', 2.5)
+			self.c.set('Settings', 'marginCloseTimeout' 2)
 			self.c.write(f)
 
 		printSuccess("Config file generated, please modify the config file and re-run this script")
@@ -87,6 +88,10 @@ class Settings(object):
 
 		if self.settings["stoplimittimeout"] < 0.5:
 			printError("Stop limit timeout cannot be less than 0.5 hours")
+			ok = False
+
+		if self.settings["marginclosetimeout"] < 1:
+			printError("Margin close timeout cannot be < 1")
 			ok = False
 
 		return ok

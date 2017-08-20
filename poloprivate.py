@@ -16,6 +16,7 @@ class PoloPrivate(object):
 		self._short_margin = config["shortmargin"]
 		self._maximum_delta = config["delta"]
 		self._stop_limit_timeout = config["stoplimittimeout"]
+		self._margin_close_timeout = config["marginclosetimeout"]
 
 		self._pair = pair
 		self._margin_position = None
@@ -83,6 +84,7 @@ class PoloPrivate(object):
 		self._profit_margin = config["profitmargin"]
 		self._maximum_delta = config["delta"]
 		self._stop_limit_timeout = config["stoplimittimeout"]
+		self._margin_close_timeout = config["marginclosetimeout"]
 
 		printInfo("Getting margin position .....")
 		self._margin_position = do(
@@ -94,8 +96,8 @@ class PoloPrivate(object):
 			# On margin position close
 			if self.status != "none":
 				self._cancel_open_orders()
-				printSuccess("Margin position closed, will wait 5 minutes")
-				time.sleep(300)
+				printSuccess("Margin position closed, will wait %s minutes" % self._margin_close_timeout)
+				time.sleep(60 * self._margin_close_timeout)
 				self._balance = self._check_balance()
 				self._turnovers.append(self.status)
 				self._closing_time = datetime.datetime.utcnow().strftime("%d/%m/%Y  %H:%M")
@@ -158,7 +160,7 @@ class PoloPrivate(object):
 
 	
 	def update_open(self, ema, lowest_ask, highest_bid):
-		result = ""
+		result = ", "
 		dict_opening_order = self._create_opening_order(ema, lowest_ask, highest_bid)
 
 		if self._opening_order != {}:
@@ -181,7 +183,8 @@ class PoloPrivate(object):
 
 					orders_to_cancel = self._filter_orders("type", dict_cancel_type[self._last_opening_dict["type"]])
 
-				result = ", cancelling opening orders - delta too high / opening type changed"
+				result += "cancelling opening orders - delta too high / opening type changed"
+				self._opening_order = {}
 			
 			elif self._last_opening_dict["rate"] != dict_opening_order["rate"]:
 				self._opening_order["orderNumber"] = self._move_order(
@@ -190,7 +193,7 @@ class PoloPrivate(object):
 					dict_opening_order["amount"],
 				)
 
-				result = ", moved opening order to %s" % (formatFloat(dict_opening_order["rate"]))
+				result += "moved opening order to %s" % (formatFloat(dict_opening_order["rate"]))
 
 		else:
 			if dict_opening_order["total"] <= 0.0001:
@@ -204,10 +207,10 @@ class PoloPrivate(object):
 						dict_opening_order["amount"],
 						0.02
 					)
-					result = ", created %s order at %s" % (dict_opening_order["type"], formatFloat(dict_opening_order["rate"]))
+					result += "created %s opening order at %s" % (dict_opening_order["type"], formatFloat(dict_opening_order["rate"]))
 
 				except Exception, e:
-					result = ", error creating order: %s" % e.message
+					result += "error creating opening order: %s" % e.message
 		
 		self._last_opening_dict = dict_opening_order
 
