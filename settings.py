@@ -47,7 +47,7 @@ class Settings(object):
 			self.c.set('Settings', 'delta', 0.9)
 			self.c.set('Settings', 'stopLimit', 0.05)
 			self.c.set('Settings', 'stopLimitTimeout', 2.5)
-			self.c.set('Settings', 'marginCloseTimeout' 2)
+			self.c.set('Settings', 'marginCloseTimeout', 2)
 			self.c.write(f)
 
 		printSuccess("Config file generated, please modify the config file and re-run this script")
